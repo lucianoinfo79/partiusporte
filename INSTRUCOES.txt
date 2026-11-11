@@ -1,0 +1,12 @@
+PP05.7.1 — Compose para habilitar filtros publicos de fotos
+
+Copiar compose.yaml para C:\partilprova\compose.yaml (substituir arquivo).
+
+PowerShell:
+cd C:\partilprova
+docker compose config --quiet
+docker compose up -d --force-recreate web
+docker compose exec web printenv PARTILPROVA_ATLAS_PHOTO_GALLERY_FILTERS
+python script/pp05_7_gallery_qualification.py --gallery-url http://localhost:3001/eventos/evento-oportunidade-teste/fotos --photo-id f2e0ed76-dd93-42b4-9e11-154ac1567804 --session-id 0a29eda3-e2ea-4f9c-9e10-228abda588be
+
+Esperado: true, 11 PASS, 0 FAIL. Nao executa migrations nem altera volumes.

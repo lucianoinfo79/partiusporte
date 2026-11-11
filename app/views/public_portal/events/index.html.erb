@@ -1,0 +1,70 @@
+<% content_for :title, "Eventos esportivos — PartilProva" %>
+<section class="pp-catalog" data-pp02-5="event-catalog">
+  <div class="pp-catalog__hero">
+    <div class="pp-container">
+      <span class="pp-eyebrow">Agenda esportiva</span>
+      <h1>Encontre sua próxima prova</h1>
+      <p>Corridas, ciclismo, mountain bike e muito mais. Explore eventos em todo o Brasil.</p>
+    </div>
+  </div>
+  <div class="pp-container pp-catalog__body">
+    <%= form_with url: public_events_path, method: :get, local: true, class: "pp-catalog__filters", role: "search" do |f| %>
+      <div class="pp-catalog__field pp-catalog__field--search">
+        <%= f.label :q, "Evento ou palavra-chave" %>
+        <%= f.search_field :q, value: @catalog.filters[:q], placeholder: "Busque uma prova" %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :modality, "Modalidade" %>
+        <%= f.select :modality, options_for_select(@catalog.modalities.map { |name, code| [name, code == "all" ? "" : code] }, @catalog.filters[:modality]) %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :state, "UF" %>
+        <%= f.text_field :state, value: @catalog.filters[:state], maxlength: 2, placeholder: "TO" %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :city, "Cidade" %>
+        <%= f.text_field :city, value: @catalog.filters[:city], placeholder: "Cidade" %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :from, "De" %>
+        <%= f.date_field :from, value: @catalog.filters[:from] %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :to, "Até" %>
+        <%= f.date_field :to, value: @catalog.filters[:to] %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :status, "Inscrições" %>
+        <%= f.select :status, options_for_select([["Todas", ""], ["Abertas", "open"], ["Encerradas", "closed"]], @catalog.filters[:status]) %>
+      </div>
+      <div class="pp-catalog__field">
+        <%= f.label :order, "Ordenação" %>
+        <%= f.select :order, options_for_select([["Próximas datas", "date_asc"], ["Datas mais distantes", "date_desc"]], @catalog.filters[:order]) %>
+      </div>
+      <div class="pp-catalog__actions">
+        <%= f.submit "Filtrar eventos", class: "pp-button pp-button--primary" %>
+        <%= link_to "Limpar filtros", public_events_path, class: "pp-button pp-button--secondary" %>
+      </div>
+    <% end %>
+    <div class="pp-catalog__heading">
+      <div><span class="pp-eyebrow">Descubra</span><h2>Eventos</h2></div>
+      <% if @catalog.total.positive? %><span><%= @catalog.total %> eventos</span><% end %>
+    </div>
+    <% if !@catalog.available %>
+      <div class="pp-empty-state pp-empty-state--warning" role="status"><strong>Agenda temporariamente indisponível</strong><p>Não conseguimos consultar o Atlas agora. Tente novamente em alguns instantes.</p></div>
+    <% elsif @catalog.events.empty? %>
+      <div class="pp-empty-state" role="status"><strong>Nenhum evento encontrado</strong><p>Altere os filtros para encontrar outras provas.</p><%= link_to "Limpar filtros", public_events_path, class: "pp-button pp-button--secondary" %></div>
+    <% else %>
+      <div class="pp-catalog__grid">
+        <% @catalog.events.each do |event| %>
+          <%= render "public_portal/events/card", event: event %>
+        <% end %>
+      </div>
+      <nav class="pp-catalog__pagination" aria-label="Paginação de eventos">
+        <% if @catalog.page > 1 %><%= link_to "← Anterior", public_events_path(@catalog.filters.merge(page: @catalog.page - 1).compact_blank), class: "pp-button pp-button--secondary" %><% end %>
+        <span>Página <%= @catalog.page %></span>
+        <% if @catalog.has_next %><%= link_to "Próxima →", public_events_path(@catalog.filters.merge(page: @catalog.page + 1).compact_blank), class: "pp-button pp-button--secondary" %><% end %>
+      </nav>
+    <% end %>
+  </div>
+</section>

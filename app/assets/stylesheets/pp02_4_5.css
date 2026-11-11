@@ -1,0 +1,25 @@
+/* PP02.4.5 — approved runner icon before PartilProva wordmark */
+.pp-brand { gap: 0; }
+.pp-brand__runner {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 44px !important;
+  height: 32px !important;
+  margin-right: 7px !important;
+  flex: 0 0 44px;
+  overflow: visible !important;
+  background: transparent !important;
+  transform: none !important;
+}
+.pp-brand__runner::before { content: none !important; display: none !important; }
+.pp-brand__runner-image {
+  display: block !important;
+  width: 44px;
+  height: 32px;
+  object-fit: contain;
+}
+@media (max-width: 620px) {
+  .pp-brand__runner { width: 37px !important; height: 28px !important; flex-basis: 37px; margin-right: 5px !important; }
+  .pp-brand__runner-image { width: 37px; height: 28px; }
+}

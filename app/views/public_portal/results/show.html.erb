@@ -1,0 +1,42 @@
+<% content_for :seo_noindex, "true" %>
+<% content_for :title, "Resultados — PartilProva" %>
+<section class="pp-results" data-pp02-8="public-results"><div class="pp-container">
+  <nav class="pp-results__breadcrumb"><%= link_to "Eventos", public_events_path %> / <%= link_to "Prova", public_event_path(params[:id]) %> / Resultados</nav>
+  <span class="pp-eyebrow">Resultados oficiais</span>
+  <h1><%= @results.event["name"].presence || "Resultados da prova" %></h1>
+  <% if @results.available? %>
+    <p>Classificações e tempos disponibilizados pelo organizador.</p>
+    <%= form_with url: public_event_results_path(params[:id]), method: :get, local: true, class: "pp-results__filters" do |f| %>
+      <div><%= f.label :q, "Nome ou número de peito" %><%= f.search_field :q, value: @results.filters[:q], placeholder: "Buscar atleta" %></div>
+      <div><%= f.label :category, "Categoria" %><%= f.select :category, options_for_select([["Todas", ""]] + @results.categories.map { |c| [c, c] }, @results.filters[:category]) %></div>
+      <%= f.submit "Buscar", class: "pp-button pp-button--primary" %>
+      <%= link_to "Limpar", public_event_results_path(params[:id]), class: "pp-button pp-button--secondary" %>
+    <% end %>
+    <% if @results.rows.empty? %>
+      <div class="pp-results__notice" role="status">Nenhum resultado encontrado para os filtros informados.</div>
+    <% else %>
+      <div class="pp-results__table-wrap"><table class="pp-results__table">
+        <thead><tr><th scope="col">Posição</th><th scope="col">Peito</th><th scope="col">Atleta</th><th scope="col">Categoria</th><th scope="col">Tempo líquido</th><th scope="col">Tempo bruto</th><th scope="col">Situação</th></tr></thead>
+        <tbody><% @results.rows.each do |row| %><tr>
+          <td><%= row[:position].presence || "—" %></td><td><%= row[:bib].presence || "—" %></td>
+          <td><strong><%= row[:name] %></strong></td><td><%= row[:category].presence || "—" %></td>
+          <td><%= row[:time].presence || "—" %></td><td><%= row[:gross_time].presence || "—" %></td>
+          <td><%= row[:status].presence || "—" %></td>
+        </tr><% end %></tbody></table></div>
+      <nav class="pp-results__pagination" aria-label="Paginação de resultados">
+        <% if @results.page > 1 %><%= link_to "← Anterior", public_event_results_path(params[:id], @results.filters.merge(page: @results.page - 1).compact_blank) %><% end %>
+        <span>Página <%= @results.page %></span>
+        <% if @results.has_next %><%= link_to "Próxima →", public_event_results_path(params[:id], @results.filters.merge(page: @results.page + 1).compact_blank) %><% end %>
+      </nav>
+    <% end %>
+  <% elsif @results.state == :filters_unsupported %>
+    <div class="pp-results__notice" role="status">A pesquisa por nome, número de peito ou categoria ainda não está disponível na API pública do Atlas. Limpe os filtros para consultar a classificação completa.</div>
+  <% elsif @results.unpublished? %>
+    <div class="pp-results__notice" role="status">Os resultados desta prova ainda não foram publicados.</div>
+  <% elsif @results.not_found? %>
+    <div class="pp-results__notice" role="status">Resultados não encontrados para esta prova.</div>
+  <% else %>
+    <div class="pp-results__notice" role="status">Os resultados estão temporariamente indisponíveis. Tente novamente mais tarde.</div>
+  <% end %>
+  <%= link_to "Voltar à prova", public_event_path(params[:id]), class: "pp-results__back" %>
+</div></section>

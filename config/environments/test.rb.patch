@@ -1,0 +1,4 @@
+# PP02.1.2
+# Add this line inside Rails.application.configure do ... end
+# so request specs using www.example.com are not rejected by HostAuthorization.
+config.hosts << "www.example.com"

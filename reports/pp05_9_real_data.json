@@ -1,0 +1,91 @@
+{
+  "construction": "PP05.9",
+  "event": "evento-oportunidade-teste",
+  "inventory": {
+    "published_total": 1,
+    "public_session_count": 1,
+    "public_album_count": 0
+  },
+  "passed": 11,
+  "failed": 0,
+  "skipped": 4,
+  "checks": [
+    {
+      "name": "Atlas API publica HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "Evento publicado",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Metadados de paginação",
+      "status": "PASS",
+      "detail": "total=1"
+    },
+    {
+      "name": "IDs públicos na primeira página",
+      "status": "PASS",
+      "detail": "fotos=1"
+    },
+    {
+      "name": "PartilProva galeria HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "Primeira foto visível no HTML",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Sessão disponível nas opções públicas",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Atlas filtro por sessão HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "PartilProva filtro por sessão HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "Fotografias da sessão presentes no HTML",
+      "status": "PASS",
+      "detail": "fotos_filtradas=1"
+    },
+    {
+      "name": "Total da sessão coerente",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "Filtro por álbum",
+      "status": "SKIP",
+      "detail": "não foi informado álbum público real"
+    },
+    {
+      "name": "Filtro combinado AND",
+      "status": "SKIP",
+      "detail": "exige álbum e sessão reais"
+    },
+    {
+      "name": "Paginação real",
+      "status": "SKIP",
+      "detail": "exige pelo menos 25 fotografias publicadas; total=1"
+    },
+    {
+      "name": "Busca por número de peito",
+      "status": "SKIP",
+      "detail": "exige número real e feature flag habilitada"
+    }
+  ],
+  "qualification": "PARTIAL",
+  "privacy": "No preview URLs, tokens, API response bodies or photographs are stored"
+}

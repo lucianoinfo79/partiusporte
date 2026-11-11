@@ -1,0 +1,4 @@
+.pp-brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1}
+.pp-brand__official-logo{display:block;width:auto;height:46px;max-width:260px;object-fit:contain}
+.pp-brand--footer .pp-brand__official-logo{height:38px;max-width:220px}
+@media(max-width:620px){.pp-brand__official-logo{height:38px;max-width:210px}}

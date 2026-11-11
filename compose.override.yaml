@@ -1,0 +1,5 @@
+# Apenas desenvolvimento local. Nao utilizar em producao.
+services:
+  web:
+    environment:
+      PP0431_LOCAL_PREVIEW_PROXY: "true"

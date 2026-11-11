@@ -1,0 +1,12 @@
+PP02.15 — Correção do link “Descobrir provas”
+
+Aplicar na raiz do projeto Partiusporte, preservando as pastas do ZIP.
+
+Arquivo incluído:
+- app/views/public_portal/home/show.html.erb
+
+O botão agora abre o catálogo público de eventos (/eventos), em vez de apontar para uma âncora da própria página inicial. Não há migration nem alteração de rotas.
+
+Validação sugerida no PowerShell, na pasta do projeto:
+
+docker compose exec -e RAILS_ENV=test web bundle exec rspec spec/requests/public_portal/home_spec.rb spec/requests/public_portal/pp02_4_home_discovery_spec.rb

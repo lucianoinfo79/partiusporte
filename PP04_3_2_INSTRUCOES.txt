@@ -1,0 +1,18 @@
+Correction PP04.3.2 — PartilProva / PhotoCatalog
+
+Escopo: substitui somente app/services/partilprova/public_portal/photo_catalog.rb
+Origem: arquivo integral exibido pelo usuario no chat.
+Alteracoes: extrai response["data"] e le paginacao de response["meta"].
+Nao altera Atlas, Docker Compose, rotas nem seguranca dos previews.
+
+INSTALACAO
+1. Extraia o ZIP na raiz C:\partilprova, preservando a estrutura de pastas e substituindo o arquivo existente.
+2. No PowerShell, em C:\partilprova, execute:
+   docker compose exec web bundle exec ruby -c app/services/partilprova/public_portal/photo_catalog.rb
+   docker compose exec web bundle exec rails runner 'r = Partilprova::PublicPortal::PhotoCatalog.new.call(event_identifier: %q[evento-oportunidade-teste]); puts %Q[STATE: #{r.state}]; puts %Q[PHOTOS: #{r.photos.length}]; puts %Q[TOTAL: #{r.total}]'
+3. Recarregue http://localhost:3001/eventos/evento-oportunidade-teste/fotos
+
+Esperado: STATE: available / PHOTOS: 1 / TOTAL: 1.
+Se nao refletir a mudanca em desenvolvimento, reinicie apenas o web: docker compose restart web
+
+Nota: validacao de integracao no ambiente do usuario ainda pendente.

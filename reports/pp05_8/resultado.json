@@ -1,0 +1,160 @@
+{
+  "construction": "PP05.8",
+  "gallery_path": "/eventos/evento-oportunidade-teste/fotos",
+  "checks": [
+    {
+      "name": "desktop: galeria HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "desktop: título visível",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: fotos publicadas",
+      "status": "PASS",
+      "detail": "cartões=1"
+    },
+    {
+      "name": "desktop: foto pública conhecida",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: sem rolagem horizontal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: visualizador abre",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: foco no botão fechar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: prévia carregada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: navegação anterior desabilitada na primeira foto",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: Escape fecha",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: foco retorna ao cartão",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "desktop: sem exceções JavaScript",
+      "status": "PASS",
+      "detail": "exceções=0"
+    },
+    {
+      "name": "sessão: HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "sessão: seleção preservada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "sessão: fotos publicadas",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "sessão sem correspondência: HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "sessão sem correspondência: estado vazio",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: galeria HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "mobile: título visível",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: fotos publicadas",
+      "status": "PASS",
+      "detail": "cartões=1"
+    },
+    {
+      "name": "mobile: foto pública conhecida",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: sem rolagem horizontal",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: visualizador abre",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: foco no botão fechar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: prévia carregada",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: navegação anterior desabilitada na primeira foto",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: Escape fecha",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: foco retorna ao cartão",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "name": "mobile: sem exceções JavaScript",
+      "status": "PASS",
+      "detail": "exceções=0"
+    }
+  ],
+  "passed": 29,
+  "failed": 0,
+  "manual_visual_approval": "PENDING",
+  "not_tested": [
+    "álbuns reais",
+    "paginação com mais de 24 fotos",
+    "busca por número de peito sem flag/dados"
+  ],
+  "note": "Nenhuma URL assinada, token ou corpo de resposta é persistido no JSON."
+}

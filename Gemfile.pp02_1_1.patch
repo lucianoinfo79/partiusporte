@@ -1,0 +1,2 @@
+# Add this inside the existing group :development, :test do
+gem "rspec-rails"

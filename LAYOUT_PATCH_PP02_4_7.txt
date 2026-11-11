@@ -1,0 +1,6 @@
+PP02.4.7 layout addition
+
+In app/views/layouts/public_portal.html.erb, immediately after the existing
+pp02_4_6 stylesheet_link_tag, add:
+
+    <%= stylesheet_link_tag "pp02_4_7", "data-turbo-track": "reload" %>

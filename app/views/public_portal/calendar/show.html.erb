@@ -1,0 +1,127 @@
+<% content_for :title, "Calendário de eventos — partiusporte" %>
+<% content_for :seo_description, "Encontre provas e atividades esportivas por data, modalidade e local." %>
+<% month_names = %w[janeiro fevereiro março abril maio junho julho agosto setembro outubro novembro dezembro] %>
+<% weekday_names = %w[Seg Ter Qua Qui Sex Sáb Dom] %>
+<% filter_params = @calendar.filters.slice(:modality, :city, :status).reject { |_key, value| value == "all" }.compact_blank %>
+
+<section class="pp-calendar-page" aria-labelledby="calendar-title">
+  <div class="pp-container">
+    <nav class="pp-calendar__breadcrumb" aria-label="Você está em">
+      <%= link_to "Início", root_path %><span aria-hidden="true">/</span><span>Calendário</span>
+    </nav>
+
+    <header class="pp-calendar__heading">
+      <h1 id="calendar-title">Calendário de eventos</h1>
+      <p>Encontre provas e atividades esportivas por data e modalidade.</p>
+    </header>
+
+    <% if !@calendar.available %>
+      <div class="pp-calendar__unavailable" role="status">
+        <strong>Agenda temporariamente indisponível</strong>
+        <p>Não foi possível consultar a agenda do Atlas agora. Tente novamente em alguns instantes.</p>
+      </div>
+    <% end %>
+
+    <div class="pp-calendar__layout">
+      <section class="pp-calendar__main" aria-label="Calendário mensal">
+        <%= form_with url: public_calendar_path, method: :get, local: true, class: "pp-calendar__filters", role: "search" do |form| %>
+          <%= form.hidden_field :month, value: @calendar.month.strftime("%Y-%m") %>
+          <div class="pp-calendar__filter-field">
+            <%= form.label :modality, "Modalidade" %>
+            <%= form.select :modality, options_for_select(@calendar.modalities, @calendar.filters[:modality]), {}, class: "pp-calendar__select" %>
+          </div>
+          <div class="pp-calendar__filter-field">
+            <%= form.label :city, "Cidade" %>
+            <%= form.select :city, options_for_select([["Todas as cidades", ""]] + @calendar.cities.map { |city| [city, city] }, @calendar.filters[:city]), {}, class: "pp-calendar__select" %>
+          </div>
+          <div class="pp-calendar__filter-field">
+            <%= form.label :status, "Inscrições" %>
+            <%= form.select :status, options_for_select(@calendar.statuses, @calendar.filters[:status]), {}, class: "pp-calendar__select" %>
+          </div>
+          <div class="pp-calendar__filter-actions">
+            <%= form.submit "Aplicar filtros", class: "pp-calendar__filter-submit" %>
+            <% if filter_params.present? %><%= link_to "Limpar", public_calendar_path(month: @calendar.month.strftime("%Y-%m")), class: "pp-calendar__clear" %><% end %>
+          </div>
+        <% end %>
+
+        <div class="pp-calendar__toolbar">
+          <nav class="pp-calendar__month-nav" aria-label="Navegar entre meses">
+            <%= link_to "‹", public_calendar_path(month: @calendar.month.prev_month.strftime("%Y-%m"), **filter_params), class: "pp-calendar__month-arrow", aria: { label: "Mês anterior" } %>
+            <h2><%= month_names[@calendar.month.month - 1].capitalize %> <%= @calendar.month.year %></h2>
+            <%= link_to "›", public_calendar_path(month: @calendar.month.next_month.strftime("%Y-%m"), **filter_params), class: "pp-calendar__month-arrow", aria: { label: "Próximo mês" } %>
+          </nav>
+          <%= link_to "Hoje", public_calendar_path(month: Date.current.strftime("%Y-%m"), date: Date.current.iso8601, **filter_params), class: "pp-calendar__today" %>
+        </div>
+
+        <div class="pp-calendar__grid" role="grid" aria-label="<%= month_names[@calendar.month.month - 1].capitalize %> de <%= @calendar.month.year %>">
+          <% weekday_names.each do |weekday| %>
+            <div class="pp-calendar__weekday" role="columnheader"><%= weekday %></div>
+          <% end %>
+          <% @calendar.days.each do |day| %>
+            <% day_events = @calendar.events_by_date.fetch(day, []) %>
+            <% selected = day == @calendar.selected_date %>
+            <% in_month = day.month == @calendar.month.month %>
+            <% day_classes = ["pp-calendar__day", ("is-selected" if selected), ("is-outside" unless in_month), ("has-events" if day_events.any?)].compact.join(" ") %>
+            <% day_label = "#{day.day} de #{month_names[day.month - 1]}" %>
+            <% day_label += ", #{pluralize(day_events.size, "evento", "eventos")}" if day_events.any? %>
+            <% day_month = in_month ? @calendar.month : day.beginning_of_month %>
+            <%= link_to public_calendar_path(month: day_month.strftime("%Y-%m"), date: day.iso8601, **filter_params), class: day_classes, role: "gridcell", aria: { label: day_label, current: ("date" if selected) } do %>
+              <span class="pp-calendar__day-number"><%= day.day %></span>
+              <% if day_events.any? %>
+                <span class="pp-calendar__event-markers" aria-hidden="true">
+                  <% [day_events.size, 3].min.times do %><i></i><% end %>
+                </span>
+                <span class="pp-calendar__event-count"><%= day_events.size %></span>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <div class="pp-calendar__legend" aria-label="Legenda">
+          <span><i class="pp-calendar__legend-dot"></i>Evento publicado</span>
+          <span><i class="pp-calendar__legend-selected"></i>Dia selecionado</span>
+        </div>
+      </section>
+
+      <aside class="pp-calendar__events" aria-labelledby="selected-day-title">
+        <header class="pp-calendar__events-heading">
+          <span>Agenda do dia</span>
+          <h2 id="selected-day-title">Eventos em <%= @calendar.selected_date.day %> de <%= month_names[@calendar.selected_date.month - 1] %></h2>
+          <p><%= pluralize(@calendar.selected_events.size, "evento publicado", "eventos publicados") %></p>
+        </header>
+        <% if @calendar.selected_events.any? %>
+          <div class="pp-calendar__event-list">
+            <% @calendar.selected_events.each do |event| %>
+              <% identifier = event[:slug].presence || event[:id].presence %>
+              <article class="pp-calendar__event-card">
+                <% if event[:image_url].to_s.start_with?("http://", "https://") %>
+                  <%= image_tag event[:image_url], alt: "", loading: "lazy", class: "pp-calendar__event-cover" %>
+                <% else %>
+                  <div class="pp-calendar__event-cover pp-calendar__event-cover--placeholder" aria-hidden="true">partiusporte</div>
+                <% end %>
+                <div class="pp-calendar__event-content">
+                  <h3><%= event[:name] %></h3>
+                  <span class="pp-calendar__modality"><%= event[:modality_label] %></span>
+                  <div class="pp-calendar__event-meta">
+                    <span><span aria-hidden="true">◷</span> <%= event[:starts_at].strftime("%H:%M") %></span>
+                    <span><span aria-hidden="true">⌖</span> <%= [event[:city], event[:state]].compact_blank.join(" · ").presence || "Local a confirmar" %></span>
+                  </div>
+                  <% if event[:registration_status].present? %>
+                    <span class="pp-calendar__registration-state"><%= event[:registration_status_label] %></span>
+                  <% end %>
+                  <% if identifier.present? %><%= link_to "Ver detalhes →", public_event_path(identifier), class: "pp-calendar__details" %><% end %>
+                </div>
+              </article>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="pp-calendar__empty-day">
+            <span class="pp-calendar__empty-icon" aria-hidden="true">▦</span>
+            <strong>Nenhum evento nesta data</strong>
+            <p>Selecione outro dia ou ajuste os filtros para ver mais eventos.</p>
+          </div>
+        <% end %>
+      </aside>
+    </div>
+  </div>
+</section>

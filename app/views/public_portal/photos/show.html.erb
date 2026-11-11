@@ -1,0 +1,142 @@
+<% content_for :seo_noindex, "true" %>
+<% content_for :title, "Fotos da prova — PartilProva" %>
+<section class="pp-photos" data-pp02-9="photos">
+  <div class="pp-container">
+    <nav class="pp-photos__breadcrumb"><%= link_to "Eventos", public_events_path %> / <%= link_to "Prova", public_event_path(params[:id]) %> / Fotos</nav>
+    <span class="pp-eyebrow">Fotografia esportiva</span>
+    <h1><%= @catalog.event["name"].presence || "Fotos da prova" %></h1>
+    <% if @photo_search_capability&.available? %>
+      <%= form_with url: public_event_photos_path(params[:id]), method: :get, local: true, class: "pp-photos__search", role: "search", data: { controller: "gallery-submit", action: "submit->gallery-submit#submit" } do |form| %>
+        <%= form.hidden_field :album_id, value: @gallery_filters.album_id if @gallery_filters&.album_id.present? %>
+        <%= form.hidden_field :session_id, value: @gallery_filters.session_id if @gallery_filters&.session_id.present? %>
+        <%= form.label :bib_number, "Buscar fotos por número de peito" %>
+        <%= form.text_field :bib_number, value: @photo_search_bib, inputmode: "numeric", pattern: "[0-9]{1,12}", maxlength: 12, autocomplete: "off", placeholder: "Ex.: 9001" %>
+        <%= form.submit "Buscar fotos", class: "pp-button pp-button--primary", data: { gallery_submit_target: "button" } %>
+        <% if @photo_search_bib.present? %><%= link_to "Limpar busca", public_event_photos_path(params[:id], **@gallery_filters.public_params) %><% end %>
+      <% end %>
+    <% end %>
+    <% if @gallery_filters_enabled && @catalog.available? && @gallery_filter_options.values.any?(&:present?) %>
+      <%= form_with url: public_event_photos_path(params[:id]), method: :get, local: true, class: "pp-photos__search", role: "search", data: { controller: "gallery-submit", action: "submit->gallery-submit#submit" }, aria: { label: "Filtrar galeria" } do |form| %>
+        <%= form.hidden_field :bib_number, value: @photo_search_bib if @photo_search_bib.present? %>
+        <% if @gallery_filter_options[:albums].present? %>
+          <%= form.label :album_id, "Álbum" %>
+          <%= form.select :album_id, options_for_select([["Todos os álbuns", ""]] + @gallery_filter_options[:albums], @gallery_filters.album_id) %>
+        <% end %>
+        <% if @gallery_filter_options[:sessions].present? %>
+          <%= form.label :session_id, "Sessão" %>
+          <%= form.select :session_id, options_for_select([["Todas as sessões", ""]] + @gallery_filter_options[:sessions], @gallery_filters.session_id) %>
+        <% end %>
+        <%= form.submit "Aplicar filtros", class: "pp-button pp-button--primary", data: { gallery_submit_target: "button" } %>
+        <% if @gallery_filters.filtered? %>
+          <%= link_to "Limpar filtros", public_event_photos_path(params[:id], bib_number: @photo_search_bib) %>
+        <% end %>
+      <% end %>
+    <% end %>
+    <% if @photo_search_unavailable %>
+      <div class="pp-photos__notice" role="status">A busca por número de peito ainda não está disponível para esta prova. Exibindo a galeria pública.</div>
+    <% end %>
+    <% if @catalog.available? %>
+      <div class="pp-photos__results" role="status" aria-live="polite" data-pp05-4="results">
+        <div>
+          <span class="pp-photos__results-eyebrow">Resultados da galeria</span>
+          <h2><%= @catalog.photos.empty? ? "Nenhuma fotografia encontrada" : "Fotografias encontradas" %></h2>
+          <p>
+            <% if @catalog.total.positive? %>
+              <%= pluralize(@catalog.total, "fotografia", "fotografias") %> no catálogo<%= @photo_search_bib.present? || @gallery_filters.filtered? ? " para os filtros selecionados" : "" %>.
+            <% elsif @catalog.photos.any? %>
+              <%= pluralize(@catalog.photos.size, "fotografia", "fotografias") %> nesta página.
+            <% else %>
+              Tente outros critérios ou consulte novamente mais tarde.
+            <% end %>
+          </p>
+        </div>
+        <% if @photo_search_bib.present? || @gallery_filters.filtered? %>
+          <%= link_to "Ver todas as fotos", public_event_photos_path(params[:id]), class: "pp-photos__results-reset" %>
+        <% end %>
+      </div>
+      <p>Confira os registros publicados desta prova. As imagens exibidas são prévias protegidas.</p>
+      <% if @catalog.participant_url.present? %>
+        <%= link_to "Encontrar minhas fotos no Portal do Atleta", @catalog.participant_url, class: "pp-button pp-button--primary", target: "_blank", rel: "noopener noreferrer" %>
+      <% else %>
+        <p class="pp-photos__hint">Acesso às fotos pessoais: disponível pelo Portal do Atleta quando habilitado pelo organizador.</p>
+      <% end %>
+      <% if @catalog.photos.empty? %>
+        <div class="pp-photos__notice pp-photos__empty" role="status" data-pp05-4="empty">
+          <h3><%= @photo_search_bib.present? || @gallery_filters.filtered? ? "Não encontramos fotos com esses filtros" : "Ainda não há fotos disponíveis" %></h3>
+          <p><%= @photo_search_bib.present? || @gallery_filters.filtered? ? "Confira o número de peito, o álbum e a sessão escolhidos ou tente uma busca diferente." : "As fotografias publicadas aparecerão aqui assim que estiverem disponíveis." %></p>
+          <% if @photo_search_bib.present? || @gallery_filters.filtered? %>
+            <%= link_to "Limpar busca e filtros", public_event_photos_path(params[:id]), class: "pp-button pp-button--primary" %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="pp-photos__grid" data-controller="photo-gallery"
+             data-action="keydown@window->photo-gallery#onKeydown">
+          <% @catalog.photos.each_with_index do |photo, index| %>
+            <article class="pp-photos__card" data-photo-gallery-target="card">
+              <button type="button" class="pp-photos__open"
+                aria-label="Ampliar fotografia <%= index + 1 %>"
+                data-action="click->photo-gallery#open"
+                data-photo-index="<%= index %>">
+              <% if index.zero? %>
+                <%= image_tag photo[:preview_url], alt: "Prévia protegida de foto da prova", loading: "eager", fetchpriority: "high", decoding: "async", referrerpolicy: "no-referrer" %>
+              <% else %>
+                <%= image_tag photo[:preview_url], alt: "Prévia protegida de foto da prova", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" %>
+              <% end %>
+              </button>
+              <div class="pp-photos__card-info">
+                <% if photo[:photographer].present? %><p>Fotografia: <%= photo[:photographer] %></p><% end %>
+                <% if photo[:participant_url].present? %><%= link_to "Ver no Portal do Atleta", photo[:participant_url], target: "_blank", rel: "noopener noreferrer" %><% end %>
+              </div>
+            </article>
+          <% end %>
+          <dialog class="pp-photos__viewer" data-photo-gallery-target="dialog"
+                  data-pp05-5="protected-viewer"
+                  aria-label="Visualização ampliada da fotografia"
+                  data-action="click->photo-gallery#backdrop">
+            <div class="pp-photos__viewer-panel">
+              <div class="pp-photos__viewer-toolbar">
+                <div>
+                  <span data-photo-gallery-target="counter" aria-live="polite"></span>
+                  <small class="pp-photos__viewer-context">Resultados da página <%= @catalog.page %><%= @photo_search_bib.present? || @gallery_filters.filtered? ? " · filtros aplicados" : "" %></small>
+                </div>
+                <button type="button" class="pp-photos__viewer-close"
+                  data-action="click->photo-gallery#close" aria-label="Fechar visualização">Fechar ×</button>
+              </div>
+              <div class="pp-photos__viewer-stage">
+                <button type="button" class="pp-photos__viewer-nav" data-photo-gallery-target="previous"
+                  data-action="click->photo-gallery#previous" aria-label="Fotografia anterior">‹</button>
+                <div class="pp-photos__viewer-image-wrap">
+                  <p class="pp-photos__viewer-status" data-photo-gallery-target="status" role="status"></p>
+                  <img data-photo-gallery-target="image" alt="Prévia protegida ampliada"
+                       referrerpolicy="no-referrer" />
+                </div>
+                <button type="button" class="pp-photos__viewer-nav" data-photo-gallery-target="next"
+                  data-action="click->photo-gallery#next" aria-label="Próxima fotografia">›</button>
+              </div>
+            </div>
+          </dialog>
+        </div>
+        <nav class="pp-photos__pagination" aria-label="Paginação de fotos">
+          <% if @catalog.page > 1 %><%= link_to "← Anterior", public_event_photos_path(params[:id], page: @catalog.page - 1, bib_number: @photo_search_bib, **@gallery_filters.public_params) %><% end %>
+          <span>Página <%= @catalog.page %></span>
+          <% if @catalog.has_next %><%= link_to "Próxima →", public_event_photos_path(params[:id], page: @catalog.page + 1, bib_number: @photo_search_bib, **@gallery_filters.public_params) %><% end %>
+        </nav>
+      <% end %>
+    <% elsif @catalog.unpublished? %>
+      <div class="pp-photos__notice pp-photos__empty" role="status" data-pp05-4="unpublished">
+        <h2>Fotos ainda não publicadas</h2>
+        <p>Os registros desta prova ainda não estão disponíveis para consulta pública.</p>
+        <%= link_to "Voltar à prova", public_event_path(params[:id]) %>
+      </div>
+    <% elsif @catalog.not_found? %>
+      <div class="pp-photos__notice" role="status">Álbum não encontrado.</div>
+    <% else %>
+      <div class="pp-photos__notice pp-photos__empty" role="alert" data-pp05-4="unavailable">
+        <h2>Não foi possível carregar as fotografias</h2>
+        <p>O serviço está temporariamente indisponível. Tente novamente em instantes.</p>
+        <%= link_to "Tentar novamente", public_event_photos_path(params[:id], page: @photo_search_query.page, bib_number: @photo_search_bib, **@gallery_filters.public_params), class: "pp-button pp-button--primary" %>
+      </div>
+    <% end %>
+    <%= link_to "Voltar à prova", public_event_path(params[:id]), class: "pp-photos__back" %>
+  </div>
+</section>

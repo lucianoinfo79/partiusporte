@@ -1,0 +1,59 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: bin/rails server -b 0.0.0.0 -p 3000
+    working_dir: /rails
+    volumes:
+      - .:/rails
+      - bundle:/usr/local/bundle
+    ports:
+      - "3001:3000"
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/partilprova_development
+      TEST_DATABASE_URL: postgresql://postgres:postgres@db:5432/partilprova_test
+      ATLAS_PUBLIC_API_BASE_URL: http://host.docker.internal:3000/api/public/v1
+      ATLAS_PUBLIC_API_OPEN_TIMEOUT: "2"
+      ATLAS_PUBLIC_API_READ_TIMEOUT: "30"
+      PARTILPROVA_ATLAS_PHOTO_GALLERY_FILTERS: "true"
+      PARTILPROVA_ATLAS_PUBLIC_ORIGIN: ${PARTILPROVA_ATLAS_PUBLIC_ORIGIN:-}
+      PARTILPROVA_REGISTRATION_ALLOWED_HOSTS: ${PARTILPROVA_REGISTRATION_ALLOWED_HOSTS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: partilprova_development
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d partilprova_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cache:
+    image: redis:8-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  bundle:
+  postgres_data:
+  redis_data:

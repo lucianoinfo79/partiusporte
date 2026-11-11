@@ -1,0 +1,204 @@
+<% content_for :title, @detail.available? ? "#{@detail.event[:name]} — partiusporte" : "Prova indisponível — partiusporte" %>
+<% if @detail.available? %>
+  <% content_for :seo_type, "event" %>
+  <% content_for :seo_description, @detail.event[:description].presence || "Confira informações, percursos e programação de #{@detail.event[:name]} no partiusporte." %>
+  <% content_for :seo_image, @detail.event[:image_url] if @detail.event[:image_url].present? %>
+  <% content_for :seo_json_ld, pp_event_json_ld(@detail.event) %>
+<% else %>
+  <% content_for :seo_noindex, "true" %>
+<% end %>
+<section class="pp-detail" data-pp02-6="event-detail">
+  <div class="pp-container">
+    <nav class="pp-detail__breadcrumb" aria-label="Navegação estrutural">
+      <%= link_to "Início", root_path %> / <%= link_to "Eventos", public_events_path %> / Detalhes
+    </nav>
+    <% if !@detail.available? %>
+      <div class="pp-detail__empty" role="status">
+        <h1><%= @detail.not_found? ? "Prova não encontrada" : "Não foi possível carregar esta prova" %></h1>
+        <p><%= @detail.not_found? ? "O evento solicitado não está disponível no catálogo." : "A consulta ao Atlas está temporariamente indisponível. Tente novamente." %></p>
+        <%= link_to "Voltar aos eventos", public_events_path, class: "pp-button pp-button--primary" %>
+      </div>
+    <% else %>
+      <% event = @detail.event %>
+      <div class="pp-detail__hero">
+        <div class="pp-detail__intro">
+          <span class="pp-eyebrow"><%= event[:modality].presence || "Evento esportivo" %></span>
+          <h1><%= event[:name] %></h1>
+          <p><%= [event[:city], event[:state]].compact_blank.join(" · ").presence || "Local a confirmar" %></p>
+          <% if event[:date].present? %><p><strong>Data:</strong> <%= l(Date.iso8601(event[:date].to_s.first(10)), format: "%d/%m/%Y") rescue event[:date].to_s.first(10) %></p><% end %>
+          <% registration_labels = {
+            available: "Inscrições abertas",
+            unavailable: "Inscrições indisponíveis",
+            not_open: "Inscrições em breve",
+            closed: "Inscrições encerradas",
+            cancelled: "Inscrições canceladas",
+            sold_out: "Vagas esgotadas",
+            missing: "Inscrições: informações em breve",
+            untrusted: "Inscrições: destino não autorizado",
+            unknown: "Situação das inscrições a confirmar"
+          } %>
+          <span class="pp-badge"><%= registration_labels.fetch(@registration_handoff.state, "Situação das inscrições a confirmar") %></span>
+          <div class="pp-detail__actions">
+            <% if @registration_handoff.available? %>
+              <% if event[:registration_provider].to_s == "atlas" %>
+                <%= link_to "Inscreva-se agora", @registration_handoff.url, class: "pp-button pp-button--primary", data: { pp_registration_handoff: "atlas" } %>
+              <% else %>
+                <%= link_to "Inscreva-se agora", @registration_handoff.url, class: "pp-button pp-button--primary", target: "_blank", rel: "noopener noreferrer", data: { pp_registration_handoff: "external" } %>
+              <% end %>
+              <p class="pp-detail__handoff-note"><%= event[:registration_provider].to_s == "atlas" ? "Você continuará sua inscrição no ambiente oficial do Atlas." : "Você continuará sua inscrição no ambiente oficial responsável pelas inscrições." %></p>
+            <% elsif @registration_handoff.state == :unavailable %>
+              <span class="pp-detail__muted">Inscrições não disponíveis pelo PartilProva para esta prova.</span>
+            <% elsif @registration_handoff.state == :not_open %>
+              <span class="pp-detail__muted">As inscrições ainda não estão abertas.</span>
+            <% elsif @registration_handoff.state == :sold_out %>
+              <span class="pp-detail__muted">As vagas para esta prova estão esgotadas.</span>
+            <% elsif @registration_handoff.state == :cancelled %>
+              <span class="pp-detail__muted">As inscrições para esta prova foram canceladas.</span>
+            <% elsif @registration_handoff.state == :closed %>
+              <span class="pp-detail__muted">As inscrições para esta prova estão encerradas.</span>
+            <% elsif @registration_handoff.state == :missing && event[:registration_provider].to_s == "atlas" %>
+              <span class="pp-detail__muted">Inscrições abertas no Atlas, mas o endereço público de inscrição ainda não está configurado no PartilProva.</span>
+            <% elsif @registration_handoff.state == :missing %>
+              <span class="pp-detail__muted">Inscrições abertas, mas o endereço de inscrição ainda não foi informado.</span>
+            <% elsif @registration_handoff.state == :untrusted %>
+              <span class="pp-detail__muted">O endereço de inscrição ainda não foi autorizado. Consulte o organizador.</span>
+            <% else %>
+              <span class="pp-detail__muted">Informações sobre inscrições em breve.</span>
+            <% end %>
+          </div>
+        </div>
+        <div class="pp-detail__cover">
+          <% if event[:image_url].present? %><%= image_tag event[:image_url], alt: "", loading: "lazy" %>
+          <% else %><span>partiusporte</span><% end %>
+        </div>
+      </div>
+      <% event_supporters = Array(event[:supporters]) %>
+      <nav class="pp-detail__tabs" aria-label="Seções da prova">
+        <a href="#sobre">Sobre</a><a href="#percursos">Percursos</a><a href="#programacao">Programação</a><a href="#kit">Kit do atleta</a><% if event_supporters.any? %><a href="#apoiadores">Apoiadores</a><% end %><a href="#regulamento">Regulamento</a>
+      </nav>
+      <div class="pp-detail__body">
+        <div class="pp-detail__main">
+          <section id="sobre" class="pp-detail__panel"><h2>Sobre a prova</h2>
+            <% if event[:description].present? %><%= simple_format(event[:description]) %><% else %><p>Descrição ainda não disponibilizada pelo organizador.</p><% end %>
+          </section>
+          <section id="percursos" class="pp-detail__panel pp-route-panel"><h2>Percursos e distâncias</h2>
+            <% map_routes = event[:routes].select { |route| route.is_a?(Hash) && route.dig("geometry", "coordinates").is_a?(Array) && route.dig("geometry", "coordinates").length >= 2 } %>
+            <% if map_routes.any? %>
+              <p class="pp-route-panel__intro">Selecione uma prova para explorar o traçado oficial no mapa.</p>
+              <div class="pp-route-map" data-controller="route-map">
+                <div class="pp-route-map__layout">
+                  <div class="pp-route-map__selector" role="group" aria-label="Selecione o percurso">
+                    <h3>Escolha uma prova</h3>
+                    <% map_routes.each_with_index do |route, index| %>
+                      <button type="button" class="pp-route-map__option<%= " is-selected" if index.zero? %>" data-route-map-target="tab" data-route-index="<%= index %>" data-action="route-map#select" aria-pressed="<%= index.zero? %>">
+                        <span><strong><%= route["race_name"].presence || route["name"] %></strong><small><%= route["distance"].presence || "Distância não informada" %></small></span>
+                      </button>
+                    <% end %>
+                    <div class="pp-route-map__stats">
+                      <h3>Detalhes da prova</h3>
+                      <% map_routes.each_with_index do |route, index| %>
+                        <div data-route-map-target="route" data-route-index="<%= index %>"<%= " hidden" unless index.zero? %>>
+                          <small>Distância do GPX</small><strong><%= route["route_distance_km"].present? ? "#{number_with_precision(route["route_distance_km"], precision: 2, strip_insignificant_zeros: true)} km" : route["distance"] %></strong>
+                          <% if route["modality"].present? %><small>Modalidade</small><strong><%= route["modality"] %></strong><% end %>
+                          <% if route["elevation_gain_m"].present? %><small>Ganho de elevação</small><strong>+ <%= number_with_delimiter(route["elevation_gain_m"]) %> m</strong><% end %>
+                          <% if route["gpx_url"].present? %><%= link_to "Baixar GPX oficial", route["gpx_url"], class: "pp-route-map__download", rel: "noopener noreferrer" %><% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="pp-route-map__visuals">
+                    <% map_routes.each_with_index do |route, index| %>
+                      <% coords = route.dig("geometry", "coordinates") %>
+                      <% lons = coords.map { |point| point[0].to_f }; lats = coords.map { |point| point[1].to_f } %>
+                      <% mid_lat = (lats.min + lats.max) / 2.0; x_scale = [Math.cos(mid_lat * Math::PI / 180).abs, 0.01].max %>
+                      <% x_values = lons.map { |lon| (lon - lons.min) * x_scale }; x_min, x_max = x_values.minmax; y_min, y_max = lats.minmax %>
+                      <% x_span = [x_max - x_min, 0.000001].max; y_span = [y_max - y_min, 0.000001].max %>
+                      <% scale = [660.0 / x_span, 350.0 / y_span].min %>
+                      <% content_width = x_span * scale; content_height = y_span * scale; offset_x = (720 - content_width) / 2; offset_y = (400 - content_height) / 2 %>
+                      <% projected = coords.map { |lon, lat| [offset_x + ((lon.to_f - lons.min) * x_scale * scale), offset_y + ((y_max - lat.to_f) * scale)] } %>
+                      <% point_string = projected.map { |x, y| "#{x.round(1)},#{y.round(1)}" }.join(" ") %>
+                      <% start_x, start_y = projected.first; finish_x, finish_y = projected.last %>
+                      <div class="pp-route-map__visual" data-route-map-target="route" data-route-index="<%= index %>"<%= " hidden" unless index.zero? %>>
+                        <svg viewBox="0 0 720 400" role="img" aria-label="Traçado GPX de <%= route["race_name"].presence || route["name"] %>">
+                          <rect width="720" height="400" rx="14" class="pp-route-map__canvas" />
+                          <path d="M0 90H720M0 200H720M0 310H720M150 0V400M360 0V400M570 0V400" class="pp-route-map__grid" />
+                          <polyline points="<%= point_string %>" class="pp-route-map__line" />
+                          <circle cx="<%= start_x.round(1) %>" cy="<%= start_y.round(1) %>" r="10" class="pp-route-map__start" />
+                          <path d="M<%= (finish_x - 10).round(1) %> <%= (finish_y + 9).round(1) %> L<%= finish_x.round(1) %> <%= (finish_y - 11).round(1) %> L<%= (finish_x + 10).round(1) %> <%= (finish_y + 9).round(1) %> Z" class="pp-route-map__finish" />
+                        </svg>
+                        <div class="pp-route-map__legend"><span><i class="pp-route-map__legend-start"></i>Largada</span><span><i class="pp-route-map__legend-finish"></i>Chegada</span><small>Visualização geográfica gerada a partir do GPX oficial.</small></div>
+                      </div>
+                    <% end %>
+                    <div class="pp-route-map__description">
+                      <% map_routes.each_with_index do |route, index| %><div data-route-map-target="route" data-route-index="<%= index %>"<%= " hidden" unless index.zero? %>><h3>Sobre este percurso</h3><p><%= route["description"].presence || "Traçado oficial da prova, conforme arquivo GPX publicado pelo organizador." %></p></div><% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <% if event[:distances].any? %><h3>Distâncias</h3><ul><% event[:distances].each do |item| %><li><% if item.is_a?(Hash) %><strong><%= item["name"] || item["title"] || "Prova" %></strong><% if item["distance"].present? %><span> — <%= item["distance"] %></span><% end %><% if item["modality"].present? %><small> · <%= item["modality"] %></small><% end %><% else %><%= item %><% end %></li><% end %></ul><% end %>
+              <% if event[:routes].any? %><h3>Percursos</h3><ul><% event[:routes].each do |item| %><li><% if item.is_a?(Hash) %><strong><%= item["name"] || item["title"] || "Percurso" %></strong><% if item["distance"].present? %><span> — <%= item["distance"] %></span><% end %><% if item["description"].present? %><p><%= item["description"] %></p><% end %><% else %><%= item %><% end %></li><% end %></ul><% else %><p>As distâncias estão cadastradas, mas o GPX oficial ainda não foi publicado para visualização no mapa.</p><% end %>
+            <% end %>
+          </section>
+          <section id="programacao" class="pp-detail__panel"><h2>Programação</h2>
+            <% if event[:schedule].any? %><ul><% event[:schedule].each do |item| %>
+              <% if item.is_a?(Hash) %>
+                <% schedule_date = begin Date.iso8601(item["date"].to_s).strftime("%d/%m/%Y"); rescue Date::Error; item["date"]; end %>
+                <% schedule_when = [schedule_date, item["time"]].compact_blank.join(" · ") %>
+                <li><% if schedule_when.present? %><strong><%= schedule_when %></strong> — <% end %><%= item["title"] || item["name"] %></li>
+              <% else %><li><%= item.to_s %></li><% end %>
+            <% end %></ul>
+            <% else %><p>Programação em breve.</p><% end %>
+          </section>
+          <section id="kit" class="pp-detail__panel"><h2>Kit do atleta</h2><p><%= event[:kit].presence || "Informações sobre o kit em breve." %></p></section>
+          <% if event_supporters.any? %>
+            <section id="apoiadores" class="pp-detail__panel pp-supporters" aria-labelledby="event-supporters-title">
+              <h2 id="event-supporters-title">Apoiadores do evento</h2>
+              <p class="pp-supporters__intro">Conheça as marcas que apoiam <%= event[:name] %> e fortalecem o esporte na nossa região.</p>
+              <div class="pp-supporters__grid">
+                <% event_supporters.each do |supporter| %>
+                  <% card = capture do %>
+                    <div class="pp-supporters__card">
+                      <% if supporter["tier"].present? %><span class="pp-supporters__tier"><%= supporter["tier"] %></span><% end %>
+                      <% if supporter["logo_url"].present? %><%= image_tag supporter["logo_url"], alt: supporter["name"], loading: "lazy" %><% else %><strong class="pp-supporters__name"><%= supporter["name"] %></strong><% end %>
+                    </div>
+                  <% end %>
+                  <% if supporter["website_url"].present? %>
+                    <%= link_to card, supporter["website_url"], class: "pp-supporters__link", target: "_blank", rel: "noopener noreferrer", aria: { label: "Visitar o site de #{supporter['name']} (abre em nova aba)" } %>
+                  <% else %>
+                    <%= card %>
+                  <% end %>
+                <% end %>
+              </div>
+            </section>
+          <% end %>
+          <section id="regulamento" class="pp-detail__panel pp-regulation" aria-labelledby="event-regulation-title">
+            <div class="pp-regulation__layout">
+              <div class="pp-regulation__copy">
+                <h2 id="event-regulation-title">Regulamento</h2>
+                <p>Consulte as regras, condições de participação e demais orientações de <%= event[:name] %>.</p>
+                <% if event[:regulation_url].blank? %><p class="pp-regulation__unavailable">Regulamento ainda não publicado.</p><% end %>
+              </div>
+              <% if event[:regulation_url].present? %>
+                <%= link_to event[:regulation_url], class: "pp-regulation__download", aria: { label: "Baixar regulamento em PDF" } do %>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 16v4h14v-4" /></svg>
+                  <span>Baixar regulamento (PDF)</span>
+                <% end %>
+              <% end %>
+            </div>
+          </section>
+        </div>
+        <aside class="pp-detail__aside">
+          <h2>Informações da prova</h2>
+          <dl><dt>Local</dt><dd><%= event[:venue].presence || "A confirmar" %></dd>
+          <dt>Cidade</dt><dd><%= [event[:city], event[:state]].compact_blank.join(" / ").presence || "A confirmar" %></dd>
+          <dt>Organização</dt><dd><%= event[:organizer].presence || "A confirmar" %></dd></dl>
+          <div class="pp-detail__aside-links" aria-label="Conteúdo da prova">
+            <%= link_to "Resultados da prova", public_event_results_path(params[:id]), class: "pp-detail__aside-link pp-detail__results-link" %>
+            <%= link_to "Fotos da prova", public_event_photos_path(params[:id]), class: "pp-detail__aside-link pp-detail__photos-link" %>
+          </div>
+        </aside>
+      </div>
+    <% end %>
+  </div>
+</section>

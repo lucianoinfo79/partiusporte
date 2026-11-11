@@ -1,0 +1,57 @@
+<% content_for :title, "PartilProva — Encontre seu próximo desafio" %>
+
+<section class="pp-home" data-pp02-4="home-discovery">
+  <section class="pp-hero">
+    <div class="pp-container pp-hero__grid">
+      <div class="pp-hero__content">
+        <span class="pp-eyebrow">Seu próximo desafio começa aqui</span>
+        <h1>Encontre seu próximo <span>desafio</span></h1>
+        <p>Corridas, ciclismo, mountain bike e muito mais. Todos os eventos em um só lugar.</p>
+        <%= form_with url: root_path, method: :get, class: "pp-home-search", local: true do |form| %>
+          <%= form.search_field :q, value: @discovery.query, placeholder: "Busque por evento, cidade ou modalidade", aria: { label: "Buscar provas" } %>
+          <%= form.hidden_field :modality, value: @discovery.modality if @discovery.modality.present? %>
+          <%= form.submit "Buscar", class: "pp-button pp-button--primary" %>
+        <% end %>
+      </div>
+      <div class="pp-hero__visual pp-hero__visual--runner" aria-hidden="true">
+        <%= image_tag "partilprova/green-runner-hero.jpg", alt: "", class: "pp-hero__runner-photo" %>
+      </div>
+    </div>
+  </section>
+
+  <section class="pp-container pp-modality-section" aria-labelledby="modalidades-title">
+    <div class="pp-section-heading pp-section-heading--inline">
+      <div><span class="pp-eyebrow">Explore</span><h2 id="modalidades-title">Escolha sua modalidade</h2></div>
+    </div>
+    <div class="pp-modality-list">
+      <% icons = { "all" => "◎", "running" => "↗", "cycling" => "◉", "mtb" => "▲", "triathlon" => "≋", "walking" => "→", "other" => "+" } %>
+      <% @discovery.modalities.each do |label, key| %>
+        <% active = (@discovery.modality.blank? && key == "all") || @discovery.modality == key %>
+        <%= link_to root_path(q: @discovery.query.presence, modality: key), class: "pp-modality #{'is-active' if active}" do %>
+          <span class="pp-modality__icon"><%= icons[key] %></span><span><%= label %></span>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="pp-container pp-featured" id="eventos" aria-labelledby="eventos-title">
+    <div class="pp-section-heading pp-section-heading--inline">
+      <div><span class="pp-eyebrow">Agenda esportiva</span><h2 id="eventos-title"><%= @discovery.query.present? ? "Resultados da busca" : "Próximos eventos" %></h2></div>
+      <span class="pp-featured__count"><%= pluralize(@discovery.events.size, "evento", "eventos") %></span>
+    </div>
+
+    <% if @discovery.events.any? %>
+      <div class="pp-event-grid">
+        <% @discovery.events.each do |event| %>
+          <%= render "public_portal/events/card", event: event %>
+        <% end %>
+      </div>
+    <% elsif !@discovery.available %>
+      <div class="pp-empty-state pp-empty-state--warning"><strong>Agenda temporariamente indisponível</strong><p>Não conseguimos consultar o Atlas agora. Tente novamente em alguns instantes.</p></div>
+    <% else %>
+      <div class="pp-empty-state"><strong>Nenhuma prova encontrada</strong><p>Tente outro nome, cidade ou modalidade.</p><%= link_to "Limpar busca", root_path, class: "pp-button pp-button--secondary" %></div>
+    <% end %>
+  </section>
+
+  <section class="pp-home-cta" id="sobre"><div class="pp-container"><div><span class="pp-eyebrow">Participe</span><h2>Uma agenda para quem está sempre em movimento.</h2></div><%= link_to "Descobrir provas", public_events_path, class: "pp-button pp-button--primary" %></div></section>
+</section>

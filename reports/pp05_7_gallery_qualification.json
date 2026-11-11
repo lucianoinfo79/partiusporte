@@ -1,0 +1,64 @@
+{
+  "construction": "PP05.7",
+  "gallery_path": "/eventos/evento-oportunidade-teste/fotos",
+  "checks": [
+    {
+      "check": "Galeria HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "Galeria HTML",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Título e navegação",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Cartões de fotografias presentes",
+      "status": "PASS",
+      "detail": "cartões=1"
+    },
+    {
+      "check": "Visualizador protegido disponível",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Acessibilidade: ampliar e fechar",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Prévia com texto alternativo",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Referer restrito nas prévias",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Fotografia pública presente no HTML",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "Filtro de sessão HTTP 200",
+      "status": "PASS",
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "Filtro de sessão mantém galeria",
+      "status": "PASS",
+      "detail": ""
+    }
+  ],
+  "passed": 11,
+  "failed": 0,
+  "manual_browser_qualification": "PENDING"
+}

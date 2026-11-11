@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <title><%= pp_seo_title %></title>
+    <meta name="description" content="<%= pp_seo_description %>">
+    <meta name="robots" content="<%= pp_seo_noindex? ? "noindex,follow" : "index,follow" %>">
+    <% if pp_seo_canonical.present? %><link rel="canonical" href="<%= pp_seo_canonical %>"><% end %>
+    <meta property="og:type" content="<%= content_for(:seo_type).presence || "website" %>">
+    <meta property="og:site_name" content="PartilProva">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:title" content="<%= pp_seo_title %>">
+    <meta property="og:description" content="<%= pp_seo_description %>">
+    <% if pp_seo_canonical.present? %><meta property="og:url" content="<%= pp_seo_canonical %>"><% end %>
+    <% if pp_seo_image.present? %><meta property="og:image" content="<%= pp_seo_image %>"><% end %>
+    <meta name="twitter:card" content="<%= pp_seo_image.present? ? "summary_large_image" : "summary" %>">
+    <meta name="twitter:title" content="<%= pp_seo_title %>">
+    <meta name="twitter:description" content="<%= pp_seo_description %>">
+    <% if pp_seo_json_ld.present? %><script type="application/ld+json"><%= raw(json_escape(pp_seo_json_ld.to_s)) %></script><% end %>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#16a34a">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_4", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_4_6", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_5", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_6", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_7", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_8", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_9", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "pp02_10", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="pp-body">
+    <a class="pp-skip-link" href="#conteudo">Ir para o conteúdo</a>
+
+    <header class="pp-header" data-public-shell="header">
+      <div class="pp-container pp-header__inner">
+        <%= link_to root_path, class: "pp-brand", aria: { label: "PartilProva — início" } do %>
+          <%= image_tag "partilprova/partilprova-logo.png", alt: "PartilProva", class: "pp-brand__official-logo" %>
+        <% end %>
+
+        <nav class="pp-nav pp-nav--desktop" aria-label="Navegação principal">
+          <%= link_to "Eventos", public_events_path, class: "pp-nav__link" %>
+          <%= link_to "Calendário", public_calendar_path, class: "pp-nav__link", aria: { current: (controller_name == "calendar" ? "page" : nil) } %>
+          <%= link_to "Resultados", public_results_path, class: "pp-nav__link" %>
+          <%= link_to "Fotos", public_photos_path, class: "pp-nav__link" %>
+          <%= link_to "Sobre", "#sobre", class: "pp-nav__link" %>
+          <%= link_to "Contato", "#contato", class: "pp-nav__link" %>
+        </nav>
+
+        <div class="pp-header__actions">
+          <button class="pp-icon-button pp-search-trigger" type="button" aria-label="Buscar">⌕</button>
+          <a class="pp-link-button pp-auth-action" href="#entrar">Entrar</a>
+          <a class="pp-button pp-button--primary pp-auth-action" href="#criar-conta">Criar conta</a>
+          <button class="pp-menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="pp-mobile-menu">☰</button>
+        </div>
+      </div>
+
+      <nav id="pp-mobile-menu" class="pp-mobile-menu" aria-label="Navegação móvel">
+        <div class="pp-container pp-mobile-menu__inner">
+          <%= link_to "Eventos", public_events_path %>
+          <%= link_to "Calendário", public_calendar_path %>
+          <%= link_to "Resultados", public_results_path %>
+          <%= link_to "Fotos", public_photos_path %>
+          <%= link_to "Sobre", "#sobre" %>
+          <%= link_to "Contato", "#contato" %>
+        </div>
+      </nav>
+    </header>
+
+    <main id="conteudo" class="pp-main">
+      <%= yield %>
+    </main>
+
+    <footer class="pp-footer" id="contato">
+      <div class="pp-container pp-footer__grid">
+        <div>
+          <div class="pp-brand pp-brand--footer"><span class="pp-brand__partil">partil</span><span class="pp-brand__prova">prova</span></div>
+          <p>Encontre provas, acompanhe resultados e reviva seus melhores momentos.</p>
+        </div>
+        <div class="pp-footer__links">
+          <%= link_to "Eventos", public_events_path %><%= link_to "Resultados", public_results_path %><%= link_to "Fotos", public_photos_path %>
+          <a href="#sobre">Sobre</a><a href="#contato">Contato</a>
+        </div>
+      </div>
+      <div class="pp-container pp-footer__bottom">© <%= Time.current.year %> PartilProva</div>
+    </footer>
+
+    <script>
+      document.addEventListener("turbo:load", () => {
+        const button = document.querySelector(".pp-menu-button");
+        const menu = document.querySelector("#pp-mobile-menu");
+        if (!button || !menu || button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+        button.addEventListener("click", () => {
+          const open = menu.classList.toggle("is-open");
+          button.setAttribute("aria-expanded", open ? "true" : "false");
+          button.textContent = open ? "×" : "☰";
+        });
+      });
+    </script>
+  </body>
+</html>

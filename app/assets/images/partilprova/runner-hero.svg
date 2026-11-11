@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" role="img" aria-label="Pessoa correndo">
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#0f1f3d"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
+<g fill="none" stroke="url(#g)" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="314" cy="83" r="35" fill="#0f1f3d" stroke="none"/>
+<path d="M291 132 226 217l88 40 54-105M310 256 224 386M310 256l117 111M366 154l82 49" stroke-width="40"/>
+<path d="M224 386 172 451M427 367l58 42" stroke="#16a34a" stroke-width="34"/>
+</g>
+<path d="M72 228h118M42 276h137M92 326h91" stroke="#16a34a" stroke-width="15" stroke-linecap="round" opacity=".85"/>
+</svg>
