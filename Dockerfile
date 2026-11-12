@@ -47,7 +47,7 @@ COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+RUN DATABASE_HOST=127.0.0.1 PARTILPROVA_PUBLIC_HOST=hml.partiusporte.com.br SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 

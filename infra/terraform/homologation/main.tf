@@ -19,7 +19,8 @@ locals {
     { name = "RAILS_ENV", value = "production" },
     { name = "RAILS_LOG_LEVEL", value = "info" },
     { name = "RAILS_MAX_THREADS", value = "5" },
-    { name = "PORT", value = "80" },
+    { name = "HTTP_PORT", value = "8080" },
+    { name = "TARGET_PORT", value = "3000" },
     { name = "PARTILPROVA_PUBLIC_HOST", value = var.app_host },
     { name = "PARTILPROVA_PUBLIC_BASE_URL", value = "https://${var.app_host}" },
     { name = "PARTILPROVA_PUBLIC_CACHE_ENABLED", value = "true" },
@@ -158,8 +159,8 @@ resource "aws_security_group" "application" {
   vpc_id      = aws_vpc.partiusporte.id
   ingress {
     description     = "HTTP from ALB"
-    from_port       = 80
-    to_port         = 80
+    from_port       = 8080
+    to_port         = 8080
     protocol        = "tcp"
     security_groups = [aws_security_group.load_balancer.id]
   }
@@ -230,7 +231,7 @@ resource "aws_secretsmanager_secret" "secret_key_base" {
 
 resource "random_password" "secret_key_base" {
   length  = 64
-  special = false
+  special = true
 }
 
 resource "aws_secretsmanager_secret_version" "secret_key_base" {
@@ -421,7 +422,7 @@ resource "aws_ecs_task_definition" "web" {
     name             = "web"
     image            = "${aws_ecr_repository.app.repository_url}:${var.image_tag}"
     essential        = true
-    portMappings     = [{ containerPort = 80, hostPort = 80, protocol = "tcp" }]
+    portMappings     = [{ containerPort = 8080, hostPort = 8080, protocol = "tcp" }]
     environment      = local.environment
     secrets          = local.task_secrets
     logConfiguration = local.task_log_configuration
@@ -469,7 +470,7 @@ resource "aws_ecs_service" "web" {
   load_balancer {
     target_group_arn = aws_lb_target_group.web.arn
     container_name   = "web"
-    container_port   = 80
+    container_port   = 8080
   }
   depends_on = [aws_lb_listener.https]
   tags       = local.tags
