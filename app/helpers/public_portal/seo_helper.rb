@@ -3,11 +3,11 @@ require "json"
 
 module PublicPortal
   module SeoHelper
-    DEFAULT_DESCRIPTION = "Encontre provas esportivas, inscrições, resultados e fotos no PartilProva.".freeze
+    DEFAULT_DESCRIPTION = "Encontre eventos esportivos, inscrições, resultados e fotos no partiusporte.".freeze
 
     def pp_seo_title
       title = content_for(:title).to_s.strip
-      title.present? ? title : "PartilProva — Encontre sua próxima prova"
+      title.present? ? title : "partiusporte — Encontre seu próximo evento esportivo"
     end
 
     def pp_seo_description

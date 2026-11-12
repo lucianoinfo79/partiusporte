@@ -47,7 +47,7 @@
               <% end %>
               <p class="pp-detail__handoff-note"><%= event[:registration_provider].to_s == "atlas" ? "Você continuará sua inscrição no ambiente oficial do Atlas." : "Você continuará sua inscrição no ambiente oficial responsável pelas inscrições." %></p>
             <% elsif @registration_handoff.state == :unavailable %>
-              <span class="pp-detail__muted">Inscrições não disponíveis pelo PartilProva para esta prova.</span>
+              <span class="pp-detail__muted">Inscrições não disponíveis pelo partiusporte para esta prova.</span>
             <% elsif @registration_handoff.state == :not_open %>
               <span class="pp-detail__muted">As inscrições ainda não estão abertas.</span>
             <% elsif @registration_handoff.state == :sold_out %>
@@ -57,7 +57,7 @@
             <% elsif @registration_handoff.state == :closed %>
               <span class="pp-detail__muted">As inscrições para esta prova estão encerradas.</span>
             <% elsif @registration_handoff.state == :missing && event[:registration_provider].to_s == "atlas" %>
-              <span class="pp-detail__muted">Inscrições abertas no Atlas, mas o endereço público de inscrição ainda não está configurado no PartilProva.</span>
+              <span class="pp-detail__muted">Inscrições abertas no Atlas, mas o endereço público de inscrição ainda não está configurado no partiusporte.</span>
             <% elsif @registration_handoff.state == :missing %>
               <span class="pp-detail__muted">Inscrições abertas, mas o endereço de inscrição ainda não foi informado.</span>
             <% elsif @registration_handoff.state == :untrusted %>

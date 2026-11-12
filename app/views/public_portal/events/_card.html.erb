@@ -8,7 +8,7 @@
     <% if safe_cover %>
       <%= image_tag cover_url, alt: "", loading: "lazy" %>
     <% else %>
-      <span class="pp-catalog-card__placeholder" aria-hidden="true">PartilProva</span>
+      <span class="pp-catalog-card__placeholder" aria-hidden="true">partiusporte</span>
     <% end %>
     <% if event[:starts_at].present? %>
       <span class="pp-catalog-card__date"><%= l(event[:starts_at].to_date, format: "%d/%m/%Y") %></span>
