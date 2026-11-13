@@ -12,6 +12,7 @@ services:
       - "3001:3000"
     environment:
       RAILS_ENV: development
+      DATABASE_HOST: db
       DATABASE_URL: postgresql://postgres:postgres@db:5432/partilprova_development
       TEST_DATABASE_URL: postgresql://postgres:postgres@db:5432/partilprova_test
       ATLAS_PUBLIC_API_BASE_URL: http://host.docker.internal:3000/api/public/v1
