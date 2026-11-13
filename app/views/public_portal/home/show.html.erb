@@ -1,4 +1,8 @@
 <% content_for :title, "partiusporte — Encontre seu próximo desafio" %>
+<% unfiltered_home = @discovery.query.blank? && @discovery.modality.blank? %>
+<% open_registration_states = %w[open opened active available] %>
+<% carousel_events = unfiltered_home ? @discovery.events : [] %>
+<% upcoming_events = @discovery.events %>
 
 <section class="pp-home" data-pp02-4="home-discovery">
   <section class="pp-hero">
@@ -19,6 +23,57 @@
     </div>
   </section>
 
+  <% if carousel_events.any? %>
+    <section class="pp-container pp-active-events" aria-labelledby="eventos-ativos-title" data-pp-event-carousel>
+      <div class="pp-active-events__heading">
+        <div>
+          <span class="pp-eyebrow">Inscrições abertas</span>
+          <h2 id="eventos-ativos-title">Eventos ativos</h2>
+          <p>Confira os eventos publicados e escolha seu próximo desafio.</p>
+        </div>
+        <div class="pp-active-events__controls">
+          <%= link_to "Ver todos", public_events_path, class: "pp-active-events__all" %>
+          <button class="pp-active-events__toggle" type="button" aria-label="Pausar rotação automática" aria-pressed="false" data-pp-carousel-toggle>Ⅱ</button>
+          <button class="pp-active-events__arrow" type="button" aria-label="Eventos anteriores" aria-controls="pp-active-events-track" data-pp-carousel-dir="-1" data-pp-carousel-control disabled>‹</button>
+          <button class="pp-active-events__arrow" type="button" aria-label="Próximos eventos ativos" aria-controls="pp-active-events-track" data-pp-carousel-dir="1" data-pp-carousel-control>›</button>
+        </div>
+      </div>
+
+      <div id="pp-active-events-track" class="pp-active-events__track pp-active-events__track--count-<%= [carousel_events.size, 3].min %>" role="region" aria-roledescription="carrossel" aria-label="Eventos ativos" tabindex="0" data-pp-carousel-track>
+        <% carousel_events.each_with_index do |event, index| %>
+          <% identifier = event[:slug].presence || event[:id].presence %>
+          <% detail_url = public_event_path(identifier) if identifier.present? %>
+          <% cover_url = event[:image_url].to_s %>
+          <% safe_cover = cover_url.start_with?("https://", "http://") %>
+          <article class="pp-active-event-card" role="group" aria-roledescription="slide" aria-label="Evento #{index + 1} de #{carousel_events.size}" data-pp-carousel-card>
+            <div class="pp-active-event-card__media">
+              <% if safe_cover %>
+                <%= image_tag cover_url, alt: "", loading: "lazy" %>
+              <% else %>
+                <span class="pp-active-event-card__placeholder" aria-hidden="true">partiusporte</span>
+              <% end %>
+            </div>
+            <div class="pp-active-event-card__content">
+              <span class="pp-badge pp-badge--success"><%= open_registration_states.include?(event[:registration_status].to_s.downcase) ? "Inscrições abertas" : "Evento ativo" %></span>
+              <h3><%= event[:name] %></h3>
+              <p>
+                <%= [event[:city], event[:state]].compact_blank.join(" · ").presence || "Local a confirmar" %>
+                <% if event[:starts_at].present? %> · <%= l(event[:starts_at].to_date, format: "%d/%m/%Y") %><% end %>
+              </p>
+              <% if detail_url %>
+                <%= link_to "Ver evento →", detail_url, class: "pp-active-event-card__link", aria: { label: "Ver evento #{event[:name]}" } %>
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+
+      <% if carousel_events.size > 1 %>
+        <div class="pp-active-events__dots" role="group" aria-label="Navegar pelos eventos ativos" data-pp-carousel-dots></div>
+      <% end %>
+    </section>
+  <% end %>
+
   <section class="pp-container pp-modality-section" aria-labelledby="modalidades-title">
     <div class="pp-section-heading pp-section-heading--inline">
       <div><span class="pp-eyebrow">Explore</span><h2 id="modalidades-title">Escolha sua modalidade</h2></div>
@@ -34,15 +89,16 @@
     </div>
   </section>
 
+  <% if upcoming_events.any? || carousel_events.empty? %>
   <section class="pp-container pp-featured" id="eventos" aria-labelledby="eventos-title">
     <div class="pp-section-heading pp-section-heading--inline">
       <div><span class="pp-eyebrow">Agenda esportiva</span><h2 id="eventos-title"><%= @discovery.query.present? ? "Resultados da busca" : "Próximos eventos" %></h2></div>
-      <span class="pp-featured__count"><%= pluralize(@discovery.events.size, "evento", "eventos") %></span>
+      <span class="pp-featured__count"><%= pluralize(upcoming_events.size, "evento", "eventos") %></span>
     </div>
 
-    <% if @discovery.events.any? %>
+    <% if upcoming_events.any? %>
       <div class="pp-event-grid">
-        <% @discovery.events.each do |event| %>
+        <% upcoming_events.each do |event| %>
           <%= render "public_portal/events/card", event: event %>
         <% end %>
       </div>
@@ -52,6 +108,7 @@
       <div class="pp-empty-state"><strong>Nenhuma prova encontrada</strong><p>Tente outro nome, cidade ou modalidade.</p><%= link_to "Limpar busca", root_path, class: "pp-button pp-button--secondary" %></div>
     <% end %>
   </section>
+  <% end %>
 
   <section class="pp-home-cta" id="sobre"><div class="pp-container"><div><span class="pp-eyebrow">Participe</span><h2>Uma agenda para quem está sempre em movimento.</h2></div><%= link_to "Descobrir provas", public_events_path, class: "pp-button pp-button--primary" %></div></section>
 </section>

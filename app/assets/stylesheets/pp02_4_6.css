@@ -1,4 +1,43 @@
 .pp-brand{display:inline-flex;align-items:center;text-decoration:none;line-height:1}
 .pp-brand__official-logo{display:block;width:auto;height:46px;max-width:260px;object-fit:contain}
-.pp-brand--footer .pp-brand__official-logo{height:38px;max-width:220px}
+.pp-brand--footer{padding:7px 10px;background:#fff;border-radius:8px}
+.pp-brand--footer .pp-brand__official-logo{width:150px;height:auto;max-width:150px}
 @media(max-width:620px){.pp-brand__official-logo{height:38px;max-width:210px}}
+
+/* Trim the clipped badge embedded at the left edge of the hero artwork. */
+.pp-hero__visual--runner{overflow:hidden;border-radius:0}
+.pp-hero__runner-photo{position:relative;left:-30px;width:calc(100% + 30px);max-width:none}
+@media(max-width:620px){.pp-hero__runner-photo{left:-18px;width:calc(100% + 18px)}}
+
+/* Active event carousel, directly above the modality selector. */
+.pp-active-events{padding-top:42px;padding-bottom:8px}
+.pp-active-events__heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:18px}
+.pp-active-events__heading h2{margin:8px 0 4px;color:var(--pp-navy);font-size:30px;line-height:1.15}
+.pp-active-events__heading p{margin:0;color:var(--pp-muted);font-size:14px}
+.pp-active-events__controls{display:flex;align-items:center;gap:10px}
+.pp-active-events__all{margin-right:6px;color:var(--pp-brand-dark);font-size:14px;font-weight:800;white-space:nowrap}
+.pp-active-events__all:hover,.pp-active-event-card__link:hover{text-decoration:underline}
+.pp-active-events__toggle{min-width:36px;height:36px;padding:0 8px;border:1px solid var(--pp-border);border-radius:8px;background:#fff;color:var(--pp-navy);font-size:15px;font-weight:800;cursor:pointer}
+.pp-active-events__toggle:hover{border-color:#86efac;background:#f0fdf4}
+.pp-active-events__arrow{width:40px;height:40px;display:inline-grid;place-items:center;border:1px solid var(--pp-border);border-radius:50%;background:#fff;color:var(--pp-brand-dark);box-shadow:var(--pp-shadow-sm);font-size:26px;line-height:1;cursor:pointer}
+.pp-active-events__arrow:hover:not(:disabled){border-color:#86efac;background:#f0fdf4}
+.pp-active-events__arrow:disabled{opacity:.4;cursor:default}
+.pp-active-events__track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 32px)/3);gap:16px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 12px}
+.pp-active-events__track--count-1{grid-auto-columns:100%}
+.pp-active-events__track--count-2{grid-auto-columns:72%}
+.pp-active-events__track::-webkit-scrollbar{display:none}
+.pp-active-event-card{min-width:0;overflow:hidden;display:flex;flex-direction:column;background:#fff;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);box-shadow:var(--pp-shadow-sm);scroll-snap-align:start}
+.pp-active-event-card__media{height:174px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(135deg,#d8f7e2,#dbeafe)}
+.pp-active-event-card__media img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
+.pp-active-event-card__placeholder{color:var(--pp-brand-dark);font-size:22px;font-style:italic;font-weight:900}
+.pp-active-event-card__content{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:9px;padding:16px 18px 18px}
+.pp-active-event-card__content .pp-badge{font-size:11px;text-transform:uppercase;letter-spacing:.025em}
+.pp-active-event-card__content h3{margin:0;color:var(--pp-navy);font-size:18px;line-height:1.25}
+.pp-active-event-card__content p{margin:0;color:var(--pp-muted);font-size:13px;line-height:1.45}
+.pp-active-event-card__link{margin-top:auto;padding-top:4px;color:var(--pp-brand-dark);font-size:14px;font-weight:800}
+.pp-active-events__dots{display:flex;justify-content:center;gap:9px;padding:4px 0 0}
+.pp-active-events__dot{width:10px;height:10px;padding:0;border:0;border-radius:50%;background:#cbd5e1;cursor:pointer}
+.pp-active-events__dot.is-active{background:var(--pp-brand)}
+.pp-active-events__dot:focus-visible,.pp-active-events__arrow:focus-visible{outline:3px solid rgb(22 163 74 / 28%);outline-offset:3px}
+@media(max-width:980px){.pp-active-events__track{grid-auto-columns:calc((100% - 16px)/2)}.pp-active-events__track--count-1{grid-auto-columns:100%}.pp-active-events__track--count-2{grid-auto-columns:72%}}
+@media(max-width:620px){.pp-active-events{padding-top:32px}.pp-active-events__heading{align-items:flex-start;flex-direction:column}.pp-active-events__heading h2{font-size:26px}.pp-active-events__controls{width:100%;justify-content:flex-end}.pp-active-events__track{grid-auto-columns:86%}.pp-active-events__track--count-1{grid-auto-columns:100%}.pp-active-event-card__media{height:160px}.pp-active-event-card__content{padding:14px}.pp-active-events__arrow{width:36px;height:36px}}

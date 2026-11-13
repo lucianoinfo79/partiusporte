@@ -85,7 +85,16 @@
           <a href="#sobre">Sobre</a><a href="#contato">Contato</a>
         </div>
       </div>
-      <div class="pp-container pp-footer__bottom">© <%= Time.current.year %> partiusporte</div>
+      <div class="pp-container pp-footer__bottom">
+        <span class="pp-footer__copyright">© <%= Time.current.year %> partiusporte</span>
+        <div class="pp-footer__credits" aria-label="Desenvolvido por MGL Sports com ATLAS">
+          <span class="pp-footer__credits-label">Desenvolvido por MGL Sports</span>
+          <%= image_tag "brands/MGL-oficial-somente-MGL-transparente-2400px.png", alt: "MGL Sports", class: "pp-footer__logo pp-footer__logo--mgl" %>
+          <span class="pp-footer__logo-frame pp-footer__logo-frame--atlas">
+            <%= image_tag "brands/atlas-logo-horizontal-sem-expansao-transparente.png", alt: "ATLAS", class: "pp-footer__logo pp-footer__logo--atlas" %>
+          </span>
+        </div>
+      </div>
     </footer>
 
     <script>
@@ -98,6 +107,128 @@
           const open = menu.classList.toggle("is-open");
           button.setAttribute("aria-expanded", open ? "true" : "false");
           button.textContent = open ? "×" : "☰";
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener("turbo:load", () => {
+        document.querySelectorAll("[data-pp-event-carousel]").forEach((carousel) => {
+          if (carousel.dataset.carouselBound === "true") return;
+          carousel.dataset.carouselBound = "true";
+
+          const track = carousel.querySelector("[data-pp-carousel-track]");
+          const cards = Array.from(carousel.querySelectorAll("[data-pp-carousel-card]"));
+          const previous = carousel.querySelector('[data-pp-carousel-dir="-1"]');
+          const next = carousel.querySelector('[data-pp-carousel-dir="1"]');
+          const toggle = carousel.querySelector("[data-pp-carousel-toggle]");
+          const dotsContainer = carousel.querySelector("[data-pp-carousel-dots]");
+          if (!track || cards.length === 0) return;
+
+          let autoAdvanceTimer = null;
+          let manuallyPaused = false;
+          const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          const stopAutoAdvance = () => {
+            window.clearTimeout(autoAdvanceTimer);
+            autoAdvanceTimer = null;
+          };
+          const canAutoAdvance = () => cards.length > 1 &&
+            track.scrollWidth > track.clientWidth + 1 &&
+            !document.hidden &&
+            !reducedMotion &&
+            !manuallyPaused &&
+            !carousel.matches(":hover") &&
+            (!carousel.contains(document.activeElement) || document.activeElement === toggle);
+          const scheduleAutoAdvance = () => {
+            stopAutoAdvance();
+            if (!canAutoAdvance()) return;
+
+            autoAdvanceTimer = window.setTimeout(() => {
+              const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+              const nextPosition = track.scrollLeft >= maxScroll - 1
+                ? 0
+                : Math.min(track.scrollLeft + track.clientWidth, maxScroll);
+              track.scrollTo({ left: nextPosition, behavior: "smooth" });
+              scheduleAutoAdvance();
+            }, 5000);
+          };
+
+          const pageCount = () => {
+            const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+            return maxScroll <= 1 ? 1 : Math.ceil(maxScroll / track.clientWidth) + 1;
+          };
+
+          const update = () => {
+            const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+            if (previous) previous.disabled = track.scrollLeft <= 1;
+            if (next) next.disabled = track.scrollLeft >= maxScroll - 1;
+
+            const pages = pageCount();
+            if (toggle) {
+              toggle.hidden = pages <= 1 || reducedMotion;
+              toggle.setAttribute("aria-pressed", manuallyPaused ? "true" : "false");
+              toggle.setAttribute("aria-label", manuallyPaused ? "Retomar rotação automática" : "Pausar rotação automática");
+              toggle.textContent = manuallyPaused ? "▶" : "Ⅱ";
+            }
+            if (dotsContainer) {
+              dotsContainer.hidden = pages <= 1;
+              if (dotsContainer.children.length !== pages) {
+                dotsContainer.replaceChildren(...Array.from({ length: pages }, (_, index) => {
+                  const dot = document.createElement("button");
+                  dot.type = "button";
+                  dot.className = "pp-active-events__dot";
+                  dot.setAttribute("aria-label", `Mostrar grupo ${index + 1} de eventos ativos`);
+                  dot.addEventListener("click", () => {
+                    const currentMax = Math.max(0, track.scrollWidth - track.clientWidth);
+                    const currentPages = pageCount();
+                    const target = currentPages <= 1 ? 0 : currentMax * index / (currentPages - 1);
+                    track.scrollTo({ left: target, behavior: reducedMotion ? "auto" : "smooth" });
+                  });
+                  return dot;
+                }));
+              }
+
+              const currentIndex = pages <= 1 ? 0 : Math.round(track.scrollLeft / maxScroll * (pages - 1));
+              Array.from(dotsContainer.children).forEach((dot, index) => {
+                const active = index === currentIndex;
+              dot.classList.toggle("is-active", active);
+              dot.setAttribute("aria-current", active ? "true" : "false");
+            });
+            }
+          };
+
+          previous?.addEventListener("click", () => {
+            stopAutoAdvance();
+            track.scrollBy({ left: -track.clientWidth, behavior: reducedMotion ? "auto" : "smooth" });
+            scheduleAutoAdvance();
+          });
+          next?.addEventListener("click", () => {
+            stopAutoAdvance();
+            track.scrollBy({ left: track.clientWidth, behavior: reducedMotion ? "auto" : "smooth" });
+            scheduleAutoAdvance();
+          });
+          toggle?.addEventListener("click", () => {
+            manuallyPaused = !manuallyPaused;
+            update();
+            if (manuallyPaused) stopAutoAdvance();
+            else scheduleAutoAdvance();
+          });
+          carousel.addEventListener("mouseenter", stopAutoAdvance);
+          carousel.addEventListener("mouseleave", scheduleAutoAdvance);
+          carousel.addEventListener("focusin", stopAutoAdvance);
+          carousel.addEventListener("focusout", (event) => {
+            if (!carousel.contains(event.relatedTarget)) scheduleAutoAdvance();
+          });
+          carousel.addEventListener("pointerdown", stopAutoAdvance);
+          carousel.addEventListener("pointerup", scheduleAutoAdvance);
+          carousel.addEventListener("pointercancel", scheduleAutoAdvance);
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) stopAutoAdvance();
+            else scheduleAutoAdvance();
+          });
+          track.addEventListener("scroll", () => window.requestAnimationFrame(update), { passive: true });
+          window.addEventListener("resize", update, { passive: true });
+          update();
+          scheduleAutoAdvance();
         });
       });
     </script>
